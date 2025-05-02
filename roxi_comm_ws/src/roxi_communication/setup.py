@@ -23,7 +23,9 @@ setup(
             'serial_comm_node = roxi_communication.serial_comm_node:main',
             'mcu_comm_node = roxi_communication.mcu_comm_node:main',
             'imu_comm_node = roxi_communication.imu_comm_node:main',
-            'tray_comm_node = roxi_communication.tray_comm_node:main'
+            'tray_comm_node = roxi_communication.tray_comm_node:main',
+            'motor_comm_node = roxi_communication.motor_comm_node:main'            
+            
         ],
     },
 )

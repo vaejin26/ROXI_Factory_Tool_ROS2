@@ -1,0 +1,15 @@
+package.xml
+setup.cfg
+setup.py
+../../build/roxi_gui/roxi_gui.egg-info/PKG-INFO
+../../build/roxi_gui/roxi_gui.egg-info/SOURCES.txt
+../../build/roxi_gui/roxi_gui.egg-info/dependency_links.txt
+../../build/roxi_gui/roxi_gui.egg-info/requires.txt
+../../build/roxi_gui/roxi_gui.egg-info/top_level.txt
+../../build/roxi_gui/roxi_gui.egg-info/zip-safe
+resource/roxi_gui
+roxi_gui/__init__.py
+roxi_gui/gui.py
+test/test_copyright.py
+test/test_flake8.py
+test/test_pep257.py

@@ -1,0 +1,26 @@
+[0.333s] Invoking command in '/home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/src/roxi_communication': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/roxi_communication build --build-base /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build install --record /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/install.log --single-version-externally-managed install_data
+[0.448s] running egg_info
+[0.455s] writing ../../build/roxi_communication/roxi_communication.egg-info/PKG-INFO
+[0.455s] writing dependency_links to ../../build/roxi_communication/roxi_communication.egg-info/dependency_links.txt
+[0.455s] writing entry points to ../../build/roxi_communication/roxi_communication.egg-info/entry_points.txt
+[0.456s] writing requirements to ../../build/roxi_communication/roxi_communication.egg-info/requires.txt
+[0.456s] writing top-level names to ../../build/roxi_communication/roxi_communication.egg-info/top_level.txt
+[0.471s] reading manifest file '../../build/roxi_communication/roxi_communication.egg-info/SOURCES.txt'
+[0.471s] writing manifest file '../../build/roxi_communication/roxi_communication.egg-info/SOURCES.txt'
+[0.471s] running build
+[0.472s] running build_py
+[0.472s] running install
+[0.475s] running install_lib
+[0.482s] running install_data
+[0.482s] copying package.xml -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/share/roxi_communication
+[0.482s] running install_egg_info
+[0.490s] removing '/home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication-0.0.0-py3.12.egg-info' (and everything under it)
+[0.491s] Copying ../../build/roxi_communication/roxi_communication.egg-info to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication-0.0.0-py3.12.egg-info
+[0.491s] running install_scripts
+[0.544s] Installing imu_comm_node script to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/roxi_communication
+[0.544s] Installing mcu_comm_node script to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/roxi_communication
+[0.544s] Installing motor_comm_node script to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/roxi_communication
+[0.544s] Installing serial_comm_node script to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/roxi_communication
+[0.544s] Installing tray_comm_node script to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/roxi_communication
+[0.544s] writing list of installed files to '/home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/install.log'
+[0.557s] Invoked command in '/home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/src/roxi_communication' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/roxi_communication build --build-base /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build install --record /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/install.log --single-version-externally-managed install_data

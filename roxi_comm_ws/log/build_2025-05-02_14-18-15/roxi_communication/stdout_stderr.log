@@ -1,0 +1,57 @@
+running egg_info
+creating ../../build/roxi_communication/roxi_communication.egg-info
+writing ../../build/roxi_communication/roxi_communication.egg-info/PKG-INFO
+writing dependency_links to ../../build/roxi_communication/roxi_communication.egg-info/dependency_links.txt
+writing entry points to ../../build/roxi_communication/roxi_communication.egg-info/entry_points.txt
+writing requirements to ../../build/roxi_communication/roxi_communication.egg-info/requires.txt
+writing top-level names to ../../build/roxi_communication/roxi_communication.egg-info/top_level.txt
+writing manifest file '../../build/roxi_communication/roxi_communication.egg-info/SOURCES.txt'
+reading manifest file '../../build/roxi_communication/roxi_communication.egg-info/SOURCES.txt'
+writing manifest file '../../build/roxi_communication/roxi_communication.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build
+creating /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib
+creating /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication
+copying roxi_communication/tray_comm_node.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication
+copying roxi_communication/__init__.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication
+copying roxi_communication/imu_comm_node.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication
+copying roxi_communication/mcu_comm_node.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication
+copying roxi_communication/comm_protocol.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication
+copying roxi_communication/serial_comm_node.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication
+copying roxi_communication/ZLAC8015D.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication
+copying roxi_communication/motor_comm_node.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication
+running install
+running install_lib
+creating /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication
+copying /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication/tray_comm_node.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication
+copying /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication/__init__.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication
+copying /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication/imu_comm_node.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication
+copying /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication/mcu_comm_node.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication
+copying /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication/comm_protocol.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication
+copying /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication/serial_comm_node.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication
+copying /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication/ZLAC8015D.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication
+copying /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/build/lib/roxi_communication/motor_comm_node.py -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication
+byte-compiling /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication/tray_comm_node.py to tray_comm_node.cpython-312.pyc
+byte-compiling /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication/__init__.py to __init__.cpython-312.pyc
+byte-compiling /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication/imu_comm_node.py to imu_comm_node.cpython-312.pyc
+byte-compiling /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication/mcu_comm_node.py to mcu_comm_node.cpython-312.pyc
+byte-compiling /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication/comm_protocol.py to comm_protocol.cpython-312.pyc
+byte-compiling /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication/serial_comm_node.py to serial_comm_node.cpython-312.pyc
+byte-compiling /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication/ZLAC8015D.py to ZLAC8015D.cpython-312.pyc
+byte-compiling /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication/motor_comm_node.py to motor_comm_node.cpython-312.pyc
+running install_data
+creating /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/share/ament_index
+creating /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/share/ament_index/resource_index
+creating /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/share/ament_index/resource_index/packages
+copying resource/roxi_communication -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/share/ament_index/resource_index/packages
+copying package.xml -> /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/share/roxi_communication
+running install_egg_info
+Copying ../../build/roxi_communication/roxi_communication.egg-info to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/python3.12/site-packages/roxi_communication-0.0.0-py3.12.egg-info
+running install_scripts
+Installing imu_comm_node script to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/roxi_communication
+Installing mcu_comm_node script to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/roxi_communication
+Installing motor_comm_node script to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/roxi_communication
+Installing serial_comm_node script to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/roxi_communication
+Installing tray_comm_node script to /home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/install/roxi_communication/lib/roxi_communication
+writing list of installed files to '/home/aleks/ROXI_Factory_Tool_ROS2/roxi_comm_ws/build/roxi_communication/install.log'
