@@ -30,20 +30,8 @@ class MotorCommNode(Node):
 
         self.motor_timer = self.create_timer(0.05, self.on_motor_timer_timeout)
         self.on_Mot_state_changed()
-
-    def on_Mot_state_changed(self, state=None):
-        if self.motors.client and self.motors.client.is_socket_open():
-            self.motors.clear_alarm()
-            self.motors.disable_motor()
-            self.motors.set_accel_time(100, 100)
-            self.motors.set_decel_time(100, 100)
-            self.motors.set_mode(3)
-            self.motors.enable_motor()
-            self.motors.set_rpm(10, 10)
-            self.get_logger().info("Motor initialized and running.")
-        else:
-            self.get_logger().error("Motor client is not connected or socket is closed.")
-
+        
+        
     def on_motor_timer_timeout(self):
         if self.motors.client and self.motors.client.is_socket_open():
             rpmL, rpmR = self.motors.get_rpm()
@@ -62,6 +50,20 @@ class MotorCommNode(Node):
         else:
             self.get_logger().error("Motor is not connected")
             self.motors.SerialportClosed()
+
+
+    def on_Mot_state_changed(self, state=None):
+        if self.motors.client and self.motors.client.is_socket_open():
+            self.motors.clear_alarm()
+            self.motors.disable_motor()
+            self.motors.set_accel_time(100, 100)
+            self.motors.set_decel_time(100, 100)
+            self.motors.set_mode(3)
+            self.motors.enable_motor()
+            self.motors.set_rpm(10, 10)
+            self.get_logger().info("Motor initialized and running.")
+        else:
+            self.get_logger().error("Motor client is not connected or socket is closed.")
 
     def MotorErrorCode(self, Code):
         error_codes = {
