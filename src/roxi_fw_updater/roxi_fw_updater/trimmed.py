@@ -39,10 +39,6 @@ P_SEND = 8
 u8CmdSetReadyToUpdateCtrl = 0x97
 
 GetMcuVersionInformation  = 0xA4
-GetTRAYSensorDATA         = 0xA6
-u8CmdSetTrayBaseLedCtrl   = 0x96
-SendReport                = 0xA3
-u8CmdSetReportSensor      = 0xA3
 
 # Initialize variables
 uart5state = IDLE_S

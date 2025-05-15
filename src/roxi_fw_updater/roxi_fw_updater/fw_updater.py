@@ -42,29 +42,29 @@ Xmodemstate = 0
 FwDownBin = None
 
 class SerailReaderThread(threading.Thread):
-    def __init__(self, ser, logger=None):
+    def __init__(self, serial_port, logger=None):
         super().__init__(daemon=True)
-        self.ser = ser
+        self.serial_port = serial_port
         self.running = True
         self.logger = logger
-        self.buffer = bytearray()
+        self.rx_buffer = bytearray()
         self.lock = threading.Lock()
     
     def run(self):
         while self.running:
             try:
-                if self.ser.in_waiting > 0:
+                if self.serial_port.in_waiting > 0:
                     print("threading")
-                    data = self.ser.read(self.ser.in_waiting)
+                    data = self.serial_port.read(self.serial_port.in_waiting)
                     with self.lock:
-                        self.buffer.extend(data)
+                        self.rx_buffer.extend(data)
                         
                     for b in data:
                         val = b if isinstance(b, int) else b[0]
                         if self.logger:
                             self.logger.info(f"📥 Received: {val:02X} ({chr(val) if 32 <= val <= 126 else '.'})")
                         else:
-                            print(f"📥 Received: {val:02X} ({chr(val) if 32 <= val <= 126 else '.'})")
+                            print(f"Received: {val:02X} ({chr(val) if 32 <= val <= 126 else '.'})")
                 time.sleep(0.01)
                 
             except Exception as e:
@@ -77,52 +77,32 @@ class SerailReaderThread(threading.Thread):
         
     def get_buffer(self):
         with self.lock:
-            data = bytes(self.buffer)
-            self.buffer.clear()
+            data = bytes(self.rx_buffer)
+            self.rx_buffer.clear()
         return data
 
-def send_ready_to_update_command(ser):
+def send_ready_to_update_command(serial_port: serial.Serial):
     global u8SendPacketIndex
     ucSendDat = bytearray(40)
-    ucSendDat[0] = 0x02  # STX
-    ucSendDat[1] = 3  # LEN
-    ucSendDat[2] = 0x01  # IDX
-    ucSendDat[3] = 0x97  # ReadyToUpdate
-    ucSendDat[4] = 0
-    ucSendDat[5] = 1
+    ucSendDat[P_STX] = 0x02  # STX
+    ucSendDat[P_LEN] = 3  # LEN
+    ucSendDat[P_Idx] = u8SendPacketIndex  # IDX
+    u8SendPacketIndex += 1
+    u8SendPacketIndex % 0xFF
+    ucSendDat[P_CMD] = u8CmdSetReadyToUpdateCtrl  # ReadyToUpdate
     
-    crc = crc16(ucSendDat[3:6], ucSendDat[1])
-    ucSendDat[6] = crc & 0xFF
-    ucSendDat[7] = (crc >> 8) & 0xFF
-    ucSendDat[8] = 0x03  # ETX
+    DatIdx = P_CMD +1
+    crc = crc16(ucSendDat[3:DatIdx], ucSendDat[P_LEN])
+    ucSendDat[DatIdx] = crc & 0xFF
+    ucSendDat[DatIdx + 1] = (crc >> 8) & 0xFF
+    ucSendDat[DatIdx + 2] = ETX
     for i in range(9):
         print(f"{ucSendDat[i]:02x}", end=", ")
     print("\n u8CmdSetReadyToUpdateCtrl")
-    if ser and ser.is_open:
-        ser.write(ucSendDat[:9])
+    serial_port.write(ucSendDat[:9])
     
     print("📤 Sent ReadyToUpdate (0x97) command to MCU")
     
-    # Wait for 'C' (0x43) from bootloader indicating XMODEM start request
-    print("⏳ Waiting for 'C' from MCU...")
-    start_time = time.time()
-    timeout_sec = 10
-
-    while time.time() - start_time < timeout_sec:
-        try:
-            if ser.in_waiting > 0:
-                data = ser.read(ser.in_waiting)  # readAll() 대체
-                for b in data:
-                    val = b if isinstance(b, int) else b[0]  # Python 3-safe
-                    print(f"📥 Received: {val:02X} ({chr(val) if 32 <= val <= 126 else '.'})")
-                    if val == 0x43:  # 'C'
-                        print("✅ Received 'C'. MCU is ready for XMODEM transfer.")
-                        return True
-        except Exception as e:
-            print(f"❌ Serial read failed: {e}")
-        time.sleep(0.05)
-
-    print("⚠️ Did not receive 'C' within timeout. MCU might not be in bootloader mode.")
 
 def crc16(pData, length):
     wCrc = 0xffff
@@ -248,12 +228,13 @@ def main(args=None):
         # ser.close() # why?
     except Exception as e:
         logger.error(f"❌ MCU 통신 실패: {e}")
-        reader_thread.stop()
+        reader_thread.stop() 
         ser.close()
         rclpy.shutdown()
         return
     
     parse_mcu_version_response(version_response)
+    
 
     # send_ready_to_update_command(ser)
     
@@ -289,6 +270,7 @@ class FirmwareUpdater:
         self.serial_port = self.reader_thread.ser
 
     def XmodemValueInitialize(self):
+        print("Xmodem Parameter Initialized")
         global Xmodemstate
         Xmodemstate = 0
         self.error_count = 0
