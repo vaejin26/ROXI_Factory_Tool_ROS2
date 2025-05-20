@@ -1,3 +1,7 @@
+# patch note:
+# 250519: 패킷을 맨 처음만 보내는 문제 해결 by self.handle_xmodem(0) at if Xmodemstate == 3
+#         진행 상태 바 추가
+# 250520: 예외 처리 추가 - 씨리얼 포트가 열리지 않을 때 프로세스 종료
 import rclpy
 from rclpy.node import Node
 import argparse
@@ -60,6 +64,8 @@ u8SendPacketIndex  = 0
 Xmodemstate = 0
 FwDownBin = None
 
+is_ready = False
+
 class SerailReaderThread(threading.Thread):
     def __init__(self, serial_port, logger=None):
         super().__init__(daemon=True)
@@ -87,10 +93,10 @@ class SerailReaderThread(threading.Thread):
                             # print(f"Xmodemstate: {Xmodemstate}")
                             if Xmodemstate != 0:
                                 self.handle_xmodem(OneByte)
-                                # print("handle_xmodem")
+                                print("handle_xmodem")
                             else:
                                 self.uart_process(OneByte)
-                                # print("uart_process")
+                                print("uart_process")
                                 
             except Exception as e:
                 if self.logger:
@@ -143,7 +149,6 @@ class SerailReaderThread(threading.Thread):
                 uart5state = ETX_S  # Move to ETX state
 
         elif uart5state == ETX_S:
-            print(f"[FSM] ETX_S 도달. cc: {cc:02X}, uartTrayCnt: {uartTrayCnt}")
             uart5state = IDLE_S
             if cc == ETX:
                 crc_dat1 = crc16(cTofBuff, uartTrayCnt - 2)
@@ -155,6 +160,7 @@ class SerailReaderThread(threading.Thread):
                         print("Ready to update")
                     elif GetMcuVersionInformation == cTofBuff[3]:
                         response = cTofBuff[:uartTrayCnt + 1]
+                        print("Not ready to update")
                         parse_mcu_version_response(response)
             else:
                 print("❌ CRC 오류 발생")
@@ -178,14 +184,7 @@ class SerailReaderThread(threading.Thread):
         global FwDownBin, Xmodemstate
         retry = 16
         char = cc.to_bytes(1, byteorder='big')
-        # char = cc
         
-        print(f"Xmodemstate: {Xmodemstate}")
-        
-        # with open(self.firmware_path, 'rb') as f:
-        #     firmware = f.read()
-        # print("Base File Size", len(firmware))
-
         if Xmodemstate == 1:  # Wait for 'C' or 'NAK'
             if char:
                 if char == NAK:
@@ -238,22 +237,27 @@ class SerailReaderThread(threading.Thread):
             if endofData == False:
                 header = self._make_send_header(self.packet_size, self.sequence)
                 checksum = self._make_send_checksum(self.crc_mode, data)
-                print(f"header: {header}")
-                print(f"data: {data}")
-                print(f"checksum: {checksum}")
                 packet = header + data + checksum
                 self.serial_port.write(packet)
                 # self.log(f"📤 Sending raw packet:")
                 # for i in bytearray(packet):
                     # print(f"{i:02x}", end=", ")
                 # self.log(f"📤 Sent packet {self.sequence}")
-                time.sleep(0.1)
+                
+                progress = int(((self.total_packets + 1) * self.packet_size) / len(FwDownBin) * 100)
+                bar_length = 30
+                filled_length = int(bar_length * progress // 100)
+                bar = '#' * filled_length + '-' * (bar_length - filled_length)
+                print(f"\r[{bar}] {progress:3d}[%]")
+                
                 Xmodemstate = 3
             else:
                 Xmodemstate = 0
                 self.XmodemValueInitialize()
                 self.serial_port.write(EOT)
+                self.serial_port.close()
                 print('send: at EOF')
+                rclpy.shutdown()
                 
         elif Xmodemstate == 3:  # Wait for ACK or NAK
             if char == ACK:
@@ -263,7 +267,8 @@ class SerailReaderThread(threading.Thread):
                 self.sequence = (self.sequence + 1) % 0x100
                 Xmodemstate = 2
                 
-                self.handle_xmodem(0)  # Send next packet
+                if is_ready == True:
+                    self.handle_xmodem(0)  # Send next packet
             else:
                 self.error_count += 1
                 Xmodemstate = 3
@@ -339,7 +344,7 @@ class SerailReaderThread(threading.Thread):
             self.logger.info(msg)
 
 def main(args=None):
-    global FwDownBin
+    global FwDownBin, is_ready
     rclpy.init(args=args)
     node = Node("fw_updater")
 
@@ -367,7 +372,7 @@ def main(args=None):
         with open(args.file, 'rb') as f:
             firmware = f.read()
         logger.info(f"✅ Firmware file found: {args.file}")
-        print("Base File Size", len(firmware))
+        print(f"File Size:  {len(firmware)} [bytes]")
         FwDownBin = firmware
         
     reader_thread = SerailReaderThread(ser, logger)
@@ -377,16 +382,24 @@ def main(args=None):
     print("Get mcu version info...")
     time.sleep(0.05)
     
-    confirm = input("\nProceed with FW update? [y/N]: ").strip().lower()
-    if confirm != 'y':
-        logger.info("⚠️ Update canceled by user.")
+    print((f"is_ready: {is_ready}"))
+    if is_ready == True:
+        confirm = input("\nProceed with FW update? [y/N]: ").strip().lower()
+        if confirm != 'y':
+            logger.info("⚠️ Update canceled by user.")
+            reader_thread.stop()
+            reader_thread.join()
+            rclpy.shutdown()
+            ser.close()
+            return
+        else:
+            send_ready_to_update_command(ser)
+    else:
+        logger.error("❌ MCU is not ready for update. Please check the port connection.")
         reader_thread.stop()
-        reader_thread.join()
         rclpy.shutdown()
         ser.close()
         return
-    else:
-        send_ready_to_update_command(ser)
         
     time.sleep(1)
     while Xmodemstate != 1:
@@ -394,98 +407,99 @@ def main(args=None):
 
     
 def Get_MCU_Version_Info(serial_port: serial.Serial): # do not modify
-        global u8SendPacketIndex
-        ucSendDat = bytearray(40)  # Data buffer
+    global u8SendPacketIndex
+    ucSendDat = bytearray(40)  # Data buffer
 
-        ucSendDat[P_STX] = 0X02  # Start byte
-        ucSendDat[P_LEN] = 1   # Length
-        ucSendDat[P_Idx] = u8SendPacketIndex
-        # u8SendPacketIndex += 1
-        # u8SendPacketIndex & 0xFF
-        ucSendDat[P_CMD] = GetMcuVersionInformation  # Command
+    ucSendDat[P_STX] = 0X02  # Start byte
+    ucSendDat[P_LEN] = 1   # Length
+    ucSendDat[P_Idx] = u8SendPacketIndex
+    # u8SendPacketIndex += 1
+    # u8SendPacketIndex & 0xFF
+    ucSendDat[P_CMD] = GetMcuVersionInformation  # Command
 
-        DatIdx = P_CMD + 1
-        crc = crc16(ucSendDat[3:DatIdx], ucSendDat[P_LEN])
-        ucSendDat[DatIdx] = crc & 0xFF  # CRC low byte
-        ucSendDat[DatIdx + 1] = (crc >> 8) & 0xFF  # CRC high byte
-        ucSendDat[DatIdx + 2] = ETX  # End byte
+    DatIdx = P_CMD + 1
+    crc = crc16(ucSendDat[3:DatIdx], ucSendDat[P_LEN])
+    ucSendDat[DatIdx] = crc & 0xFF  # CRC low byte
+    ucSendDat[DatIdx + 1] = (crc >> 8) & 0xFF  # CRC high byte
+    ucSendDat[DatIdx + 2] = ETX  # End byte
 
-        for i in range(DatIdx + 3):
-            print(f"{ucSendDat[i]:02x}", end=", ")
-        serial_port.write(ucSendDat[:DatIdx + 3])  # Send data
+    for i in range(DatIdx + 3):
+        print(f"{ucSendDat[i]:02x}", end=", ")
+    serial_port.write(ucSendDat[:DatIdx + 3])  # Send data
         
 def parse_mcu_version_response(response: bytes):
-        if len(response) < 44:
-            print("❌ 응답 길이 부족:", len(response))
-            return
+    global is_ready
+    if len(response) < 44:
+        print("❌ 응답 길이 부족:", len(response))
+        return
 
-        start = 4  # 데이터는 STX(0x02) ~ CMD 이후부터 시작
-        def u16(lo, hi): return (response[hi] << 8) | response[lo]
+    start = 4  # 데이터는 STX(0x02) ~ CMD 이후부터 시작
+    def u16(lo, hi): return (response[hi] << 8) | response[lo]
 
-        ver_year = []
-        ver_month = []
-        ver_day = []
-        ver_major = []
-        ver_minor = []
+    ver_year = []
+    ver_month = []
+    ver_day = []
+    ver_major = []
+    ver_minor = []
 
-        print("📥 MCU Version Info:")
+    print("📥 MCU Version Info:")
 
-        for i in range(5):  # 1개는 배터리, 4개는 tray
-            base = start + i * 8
-            year = u16(base + 0, base + 1)
-            month = response[base + 2]
-            day = response[base + 3]
-            major = u16(base + 4, base + 5)
-            minor = u16(base + 6, base + 7)
+    for i in range(5):  # 1개는 배터리, 4개는 tray
+        base = start + i * 8
+        year = u16(base + 0, base + 1)
+        month = response[base + 2]
+        day = response[base + 3]
+        major = u16(base + 4, base + 5)
+        minor = u16(base + 6, base + 7)
 
-            ver_year.append(year)
-            ver_month.append(month)
-            ver_day.append(day)
-            ver_major.append(major)
-            ver_minor.append(minor)
+        ver_year.append(year)
+        ver_month.append(month)
+        ver_day.append(day)
+        ver_major.append(major)
+        ver_minor.append(minor)
 
-            if year == 0 and month == 0 and day == 0 and major == 0 and minor == 0:
-                if i == 0:
-                    print("  - Battery: ❌ Not Connected or Invalid")
-                else:
-                    print(f"  - Tray{i}: ❌ Not Connected or Invalid")
+        if year == 0 and month == 0 and day == 0 and major == 0 and minor == 0:
+            is_ready = True
+            if i == 0:
+                print("  - Battery: ❌ Not Connected or Invalid")
             else:
-                label = "Battery" if i == 0 else f"Tray{i}"
-                print(f"  - {label}: V{major}.{minor} ({year}.{month}.{day})")
+                print(f"  - Tray{i}: ❌ Not Connected or Invalid")
+        else:
+            label = "Battery" if i == 0 else f"Tray{i}"
+            print(f"  - {label}: V{major}.{minor} ({year}.{month}.{day})")
                 
 def send_ready_to_update_command(serial_port: serial.Serial):
-        global u8SendPacketIndex
-        ucSendDat = bytearray(40)
-        ucSendDat[P_STX] = 0x02  # STX
-        ucSendDat[P_LEN] = 3  # LEN
-        ucSendDat[P_Idx] = 1  # IDX
-        u8SendPacketIndex += 1
-        u8SendPacketIndex % 0xFF
+    global u8SendPacketIndex
+    ucSendDat = bytearray(40)
+    ucSendDat[P_STX] = 0x02  # STX
+    ucSendDat[P_LEN] = 3  # LEN
+    ucSendDat[P_Idx] = 1  # IDX
+    u8SendPacketIndex += 1
+    u8SendPacketIndex % 0xFF
         
-        ucSendDat[P_CMD] = u8CmdSetReadyToUpdateCtrl  # ReadyToUpdate
-        ucSendDat[P_Dat] = 0
-        ucSendDat[P_Dat + 1] = 1
-        
-        DatIdx = P_Dat +2
-        crc = crc16(ucSendDat[3:DatIdx], ucSendDat[P_LEN])
-        ucSendDat[DatIdx] = crc & 0xFF
-        ucSendDat[DatIdx + 1] = (crc >> 8) & 0xFF
-        ucSendDat[DatIdx + 2] = ETX
-        
-        for i in range(DatIdx + 3):
-            print(f"{ucSendDat[i]:02x}", end=", ")
-        serial_port.write(ucSendDat[:DatIdx + 3])  # Send data
-
-        print("📤 Sent ReadyToUpdate (0x97) command to MCU")
+    ucSendDat[P_CMD] = u8CmdSetReadyToUpdateCtrl  # ReadyToUpdate
+    ucSendDat[P_Dat] = 0
+    ucSendDat[P_Dat + 1] = 1
+    
+    DatIdx = P_Dat +2
+    crc = crc16(ucSendDat[3:DatIdx], ucSendDat[P_LEN])
+    ucSendDat[DatIdx] = crc & 0xFF
+    ucSendDat[DatIdx + 1] = (crc >> 8) & 0xFF
+    ucSendDat[DatIdx + 2] = ETX
+    
+    for i in range(DatIdx + 3):
+        print(f"{ucSendDat[i]:02x}", end=", ")
+    serial_port.write(ucSendDat[:DatIdx + 3])  # Send data
+    print("📤 Sent ReadyToUpdate (0x97) command to MCU")
 
 
 def crc16(pData, length):
-        wCrc = 0xffff
-        for byte in pData[:length]:
-            wCrc ^= byte << 8
-            for _ in range(8):
-                if wCrc & 0x8000:
-                    wCrc = (wCrc << 1) ^ 0x1021
-                else:
-                    wCrc <<= 1
-        return wCrc & 0xffff
+    wCrc = 0xffff
+    for byte in pData[:length]:
+        wCrc ^= byte << 8
+        for _ in range(8):
+            if wCrc & 0x8000:
+                wCrc = (wCrc << 1) ^ 0x1021
+            else:
+                wCrc <<= 1
+    return wCrc & 0xffff
