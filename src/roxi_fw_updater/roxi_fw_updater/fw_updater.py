@@ -2,6 +2,7 @@
 # 250519: 패킷을 맨 처음만 보내는 문제 해결 by self.handle_xmodem(0) at if Xmodemstate == 3
 #         진행 상태 바 추가
 # 250520: 예외 처리 추가 - 씨리얼 포트가 열리지 않을 때 프로세스 종료
+#         업데이트 성공 표현 추가
 import rclpy
 from rclpy.node import Node
 import argparse
@@ -65,6 +66,7 @@ Xmodemstate = 0
 FwDownBin = None
 
 is_ready = False
+is_complete = False
 
 class SerailReaderThread(threading.Thread):
     def __init__(self, serial_port, logger=None):
@@ -101,6 +103,8 @@ class SerailReaderThread(threading.Thread):
             except Exception as e:
                 if self.logger:
                     self.logger.error(f"Serial read failed in thread: {e}")
+                    if is_complete == True:
+                        self.logger.info("FW update completed.")
                 self.running = False
                 
             time.sleep(0.001)  # Sleep to prevent high CPU usage
@@ -181,7 +185,7 @@ class SerailReaderThread(threading.Thread):
         self.RecivedData = 0
 
     def handle_xmodem(self, cc):
-        global FwDownBin, Xmodemstate
+        global FwDownBin, Xmodemstate, is_complete
         retry = 16
         char = cc.to_bytes(1, byteorder='big')
         
@@ -257,6 +261,7 @@ class SerailReaderThread(threading.Thread):
                 self.serial_port.write(EOT)
                 self.serial_port.close()
                 print('send: at EOF')
+                is_complete = True
                 rclpy.shutdown()
                 
         elif Xmodemstate == 3:  # Wait for ACK or NAK
@@ -382,7 +387,6 @@ def main(args=None):
     print("Get mcu version info...")
     time.sleep(0.05)
     
-    print((f"is_ready: {is_ready}"))
     if is_ready == True:
         confirm = input("\nProceed with FW update? [y/N]: ").strip().lower()
         if confirm != 'y':
@@ -395,7 +399,7 @@ def main(args=None):
         else:
             send_ready_to_update_command(ser)
     else:
-        logger.error("❌ MCU is not ready for update. Please check the port connection.")
+        logger.error("❌ MCU is not ready for update. Please check the connection.")
         reader_thread.stop()
         rclpy.shutdown()
         ser.close()
